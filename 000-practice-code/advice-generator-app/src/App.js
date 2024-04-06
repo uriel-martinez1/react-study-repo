@@ -10,6 +10,9 @@ export default function App() {
     const response = await fetch("https://api.adviceslip.com/advice");
     const data = await response.json();
     console.log(data);
+    console.log(data.slip.advice);
+    setAdvice(data.slip.advice);
+    setCount((c) => c + 1);
   }
 
   // we will useEffect that will call the function getAdvice
