@@ -20,7 +20,7 @@ export default function App() {
   // we will need to bring the tasks into the app using the useState hook
   const [tasks, setTasks] = useState(INITIAL_TASKS);
   // this will have the the input for new tasks, default set to empty string
-  const [newTasks, setNewTask] = useState('');
+  const [newTask, setNewTask] = useState('');
 
   // Items inside the return will render the UI in the application
   return (
@@ -30,28 +30,48 @@ export default function App() {
       <h1>Todo List</h1>
       
       {/*New Task Input */}
+      {/*Aria-label is meant for screen readers to be able to enterpret the input field*/}
+      {/*Value is like v-bind:value in Vue.js that binds the value in the input field to the variable that will store that data in the state*/}
+      {/*Onchange is like the function that looks for on click event and does something */}
       <div>
-        <input type="text" placeholder='Add your task' />
+        <input 
+        aria-label="Add new task" 
+        type="text" 
+        placeholder='Add your task' 
+        value={newTask} 
+        onChange={(event) =>{
+          setNewTask(event.target.value);
+          }} 
+        />
+
         <div>
-          <button>Submit</button>
+          {/*We are now including the new task in the tasks state (INITIAL_TASKS) based on a on click event on the submit button -- it uses the concat function to add the new object in the initial tasks array */}
+          <button onClick={(event) => {
+            setTasks(
+              tasks.concat({
+                id: id++,
+                label: newTask.trim(),
+              }),
+            );
+            {/*We will need to reset the sertNewTask state as empty string so we can add more*/}
+            setNewTask('');
+          }}>Submit</button>
         </div>
       </div>
 
       {/*This is where the existing tasks live*/}
       <div>
         <ul>
-          <li>
-            <span>Feed the cat</span> 
-            <button>Completed</button>
-          </li>
-          <li>
-            <span>Wash the dishes</span> 
-            <button>Completed</button>
-          </li>
-          <li>
-            <span>Clean the kitchen</span> 
-            <button>Completed</button>
-          </li>
+          {tasks.map(({id,label}) => (
+            <li key={id}>
+              <span>{label}</span>
+              <button onClick={(event) => {
+                setTasks(
+                  tasks.filter((task) => task.id !== id),
+                );
+              }}>Delete</button>
+            </li>
+          ))}
         </ul>
       </div>
 
