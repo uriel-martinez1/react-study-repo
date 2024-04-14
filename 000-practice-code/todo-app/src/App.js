@@ -3,15 +3,19 @@ import './App.css';
 // this allows us to add state - or a data store in React 
 import { useState } from 'react';
 
-// 2. We are going to create a variable for id -- this will be used for new items in the todo list
-let id = 0;
+// 2. Encapsulate the ID generation so that it can only be read and modified from external modifications
+// This variable after the (() => {...})() is not accesible from the outside the function, this is a IIFE
+const newId = (() => {
+  let id = 0;
+  return () => id++;
+})();
 
 // 3. We will the need to create an array that store the task as onjects
 // its like vue, every object needs an id, also since each attribute follows the key value pair pattern, task needs a label and the actual task is a string
 const INITIAL_TASKS = [
-  {id: id++, label: 'Feed the cat'},
-  {id: id++, label: 'Wash the dishes'},
-  {id: id++, label: 'Clean the kitchen'},
+  {id: newId(), label: 'Feed the cat'},
+  {id: newId(), label: 'Wash the dishes'},
+  {id: newId(), label: 'Clean the kitchen'},
 ];
 
 // This is your functional component named App
@@ -31,9 +35,24 @@ export default function App() {
       
       {/*New Task Input */}
       {/*Aria-label is meant for screen readers to be able to enterpret the input field*/}
-      {/*Value is like v-bind:value in Vue.js that binds the value in the input field to the variable that will store that data in the state*/}
-      {/*Onchange is like the function that looks for on click event and does something */}
-      <div>
+      <form onSubmit={(event) => {
+        event.preventDefault();
+        if (newTask.trim() === '') {
+          window.alert('The task field is empty! Please add task.');
+          return;
+        }
+        {/*This creates a new array (...) and adds the new task with generatd id number and label in input */}
+        setTasks([
+          ...tasks,
+          {id: newId(), label: newTask.trim() },
+        ]);
+
+        {/*This is not setting the setNewTask variable to an empty string */}
+        setNewTask('');
+        }}>
+
+        {/*Value is like v-bind:value in Vue.js that binds the value in the input field to the variable that will store that data in the state*/}
+        {/*Onchange is like the function that looks for on click event and does something */}
         <input 
         aria-label="Add new task" 
         type="text" 
@@ -45,35 +64,27 @@ export default function App() {
         />
 
         <div>
-          {/*We are now including the new task in the tasks state (INITIAL_TASKS) based on a on click event on the submit button -- it uses the concat function to add the new object in the initial tasks array */}
-          <button onClick={(event) => {
-            setTasks(
-              tasks.concat({
-                id: id++,
-                label: newTask.trim(),
-              }),
-            );
-            {/*We will need to reset the sertNewTask state as empty string so we can add more*/}
-            setNewTask('');
-          }}>Submit</button>
+          <button>Submit</button>
         </div>
-      </div>
+      </form>
 
-      {/*This is where the existing tasks live*/}
-      <div>
+      {/*This displays an empty message when there are no tasks or it asks a question right before deleting the task*/}
+      {tasks.length === 0  ? (<div>No tasks added</div>) : (
         <ul>
           {tasks.map(({id,label}) => (
             <li key={id}>
               <span>{label}</span>
-              <button onClick={(event) => {
-                setTasks(
-                  tasks.filter((task) => task.id !== id),
-                );
-              }}>Delete</button>
+
+              <button onClick={() => {
+                if(window.confirm('Are you sure you want to delete the task?')) 
+                {setTasks(tasks.filter((task) => task.id !== id))}
+                }}>Delete
+              </button>
+
             </li>
           ))}
         </ul>
-      </div>
+      )}
 
     </div>
   );
